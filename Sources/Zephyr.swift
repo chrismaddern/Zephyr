@@ -110,6 +110,26 @@ public final class Zephyr: NSObject {
             printGeneralSyncStatus(finished: true, destination: .local)
         }
     }
+    
+    /// Force Push local to remote.
+    ///
+    /// If one or more keys are passed, only those keys will be synchronized.
+    ///
+    /// - Parameters:
+    ///     - keys: If you pass a one or more keys, only those key will be synchronized. If no keys are passed, than all `UserDefaults` will be synchronized with `NSUbiquitousKeyValueStore`.
+    public static func forcePush(keys: String...) {
+        
+        if !keys.isEmpty {
+            sync(keys: keys)
+            return
+        }
+        
+        printGeneralSyncStatus(finished: false, destination: .remote)
+        shared.zephyrQueue.sync {
+            shared.syncToCloud()
+        }
+        printGeneralSyncStatus(finished: true, destination: .remote)
+    }
 
     /// Overloaded version of Zephyr's synchronization method, `sync(keys:)`.
     ///
