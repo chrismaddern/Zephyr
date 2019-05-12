@@ -250,7 +250,7 @@ private extension Zephyr {
             let localDate = zephyrLocalStoreDictionary[ZephyrSyncKey] as? Date {
 
             // If both localDate and remoteDate exist, compare the two, and then synchronize the data stores.
-            return localDate.timeIntervalSince1970 > remoteDate.timeIntervalSince1970 ? .local : .remote
+            return remoteDate.timeIntervalSince1970 > localDate.timeIntervalSince1970 ? .remote : .local
 
         } else {
 
