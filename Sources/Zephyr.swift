@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 /// Enumerates the Local (`UserDefaults`) and Remote (`NSUNSUbiquitousKeyValueStore`) data stores
 private enum ZephyrDataStore {
@@ -26,8 +27,8 @@ public final class Zephyr: NSObject {
     /// If **true**, then `NSUbiquitousKeyValueStore.synchronize()` will be called immediately after any change is made.
     public static var syncUbiquitousKeyValueStoreOnChange = true
 
-    @available(*, deprecated: 2.2.1, unavailable, renamed: "syncUbiquitousKeyValueStoreOnChange")
-    public static var syncUbiquitousStoreKeyValueStoreOnChange = true
+    /// A string containing the notification name that will be posted when Zephyr receives updated data from iCloud.
+    public static let keysDidChangeOnCloudNotification = Notification.Name("ZephyrKeysDidChangeOnCloudNotification")
 
     /// The singleton for Zephyr.
     private static let shared = Zephyr()
@@ -406,7 +407,7 @@ extension Zephyr {
             return
         }
 
-        if let index = registeredObservationKeys.index(of: key) {
+        if let index = registeredObservationKeys.firstIndex(of: key) {
 
             userDefaults.removeObserver(self, forKeyPath: key, context: nil)
             registeredObservationKeys.remove(at: index)
@@ -458,6 +459,9 @@ extension Zephyr {
             for key in monitoredKeys where cloudKeys.contains(key) {
                 syncSpecificKeys(keys: [key], dataStore: .remote)
             }
+
+            // Notify any observers that we have finished synchronizing an update from iCloud.
+            NotificationCenter.default.post(name: Zephyr.keysDidChangeOnCloudNotification, object: nil)
         }
     }
 
